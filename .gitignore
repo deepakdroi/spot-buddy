@@ -1,0 +1,35 @@
+# Node
+node_modules
+.pnp
+.pnp.js
+coverage
+.next/
+out/
+build
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.env
+venv/
+env/
+.venv/
+
+# React Native / Expo
+.expo/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+
+# Turborepo
+.turbo
+
+# OS
+.DS_Store
+Thumbs.db
