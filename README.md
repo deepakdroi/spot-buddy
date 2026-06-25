@@ -1,0 +1,2 @@
+# spot-buddy
+Workout monitor
