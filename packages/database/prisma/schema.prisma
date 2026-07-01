@@ -1,0 +1,30 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider  = "postgresql"
+    url       = env("DATABASE_URL")
+    directUrl = env("DIRECT_URL")
+}
+
+model User {
+    id             String   @id @default(cuid())
+    email          String   @unique
+    name           String
+    dob            DateTime
+    hashedPassword String
+
+    // fastapi-users compatibility fields
+    isActive    Boolean @default(true)
+    isSuperuser Boolean @default(false)
+    isVerified  Boolean @default(false)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("user")
+}
