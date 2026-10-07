@@ -15,7 +15,7 @@ from app.schemas import UserRead, UserCreate, UserUpdate
 
 # Initialize FastAPI app
 app = FastAPI(title="Spot Buddy API", version="1.0.0")
-
+    
 # CORS Configuration
 CORS_ORIGINS = getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
 app.add_middleware(
@@ -61,6 +61,8 @@ fastapi_users = FastAPIUsers[User, str](
     [auth_backend],
 )
 
+from app.routers.planner import router as planner_router, exercises_router
+
 # Generate UUID for new users
 def get_user_id() -> str:
     return str(uuid.uuid4())
@@ -84,6 +86,9 @@ app.include_router(
     prefix="/users",
     tags=["users"],
 )
+
+app.include_router(planner_router)
+app.include_router(exercises_router)
 
 
 @app.get("/")
