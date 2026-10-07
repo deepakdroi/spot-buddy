@@ -1,5 +1,4 @@
 import * as React from "react";
-import { Slot } from "@radix-ui/react-slot";
 import { cn } from "@/lib/utils";
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -25,7 +24,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref,
   ) => {
-    const Comp = asChild ? Slot : "button";
     const baseStyles =
       "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50";
 
@@ -47,8 +45,26 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       icon: "h-10 w-10",
     };
 
+    if (asChild) {
+      const { children, ...restProps } = props;
+      const child = React.Children.only(children) as React.ReactElement<{
+        className?: string;
+      }>;
+
+      return React.cloneElement(child, {
+        ...restProps,
+        className: cn(
+          baseStyles,
+          variants[variant],
+          sizes[size],
+          child.props.className,
+          className,
+        ),
+      });
+    }
+
     return (
-      <Comp
+      <button
         className={cn(baseStyles, variants[variant], sizes[size], className)}
         ref={ref}
         {...props}

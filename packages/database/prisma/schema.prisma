@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
     provider = "prisma-client-js"
 }
@@ -11,12 +8,34 @@ datasource db {
     directUrl = env("DIRECT_URL")
 }
 
+enum Day {
+    MONDAY
+    TUESDAY
+    WEDNESDAY
+    THURSDAY
+    FRIDAY
+    SATURDAY
+    SUNDAY
+}
+
+enum BodyPart {
+    CHEST
+    BACK
+    LEGS
+    SHOULDERS
+    BICEPS
+    TRICEPS
+    CORE
+    FULL_BODY
+}
+
 model User {
     id             String   @id @default(cuid())
     email          String   @unique
     name           String
     dob            DateTime
     hashedPassword String
+    preferredChart String   @default("RVI")
 
     // fastapi-users compatibility fields
     isActive    Boolean @default(true)
@@ -26,5 +45,37 @@ model User {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
+    plans Plan[]
+
     @@map("user")
+}
+
+model Plan {
+    id        String     @id @default(cuid())
+    day       Day
+    bodyParts BodyPart[]
+    userId    String
+    user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    exercises Exercise[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@unique([userId, day])
+    @@map("plan")
+}
+
+model Exercise {
+    id         String   @id @default(cuid())
+    name       String
+    bodyPart   BodyPart
+    isStandard Boolean  @default(false)
+
+    plans Plan[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("exercise")
 }
