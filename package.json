@@ -9,6 +9,10 @@
   "overrides": {
     "http-errors": "2.0.0",
     "tailwindcss": "3.3.2",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
     "nativewind": {
       "tailwindcss": "3.3.2"
     }
@@ -20,5 +24,10 @@
   },
   "devDependencies": {
     "turbo": "latest"
+  },
+  "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.18",
+    "@radix-ui/react-popover": "^1.1.18",
+    "cmdk": "^1.1.1"
   }
 }
