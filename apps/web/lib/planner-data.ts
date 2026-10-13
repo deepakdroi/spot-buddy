@@ -21,7 +21,7 @@ export interface PlannerPlan {
 export async function getUserPlans(
   accessToken?: string,
 ): Promise<PlannerPlan[]> {
-  const apiUrl = "http://127.0.0.1:8000";
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
   const headers: Record<string, string> = {
     Accept: "application/json",
   };
@@ -60,7 +60,7 @@ export interface ExerciseCatalogItem {
 }
 
 export async function getExerciseCatalog(): Promise<ExerciseCatalogItem[]> {
-  const apiUrl = "http://127.0.0.1:8000";
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
   try {
     const response = await fetch(`${apiUrl}/exercises`, {

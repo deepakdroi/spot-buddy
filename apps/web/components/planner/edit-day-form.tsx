@@ -127,7 +127,6 @@ export function EditDayForm({
       })();
     });
   };
-  console.log("Catalog received in form:", catalog);
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
       <Input readOnly value={dayLabel} />

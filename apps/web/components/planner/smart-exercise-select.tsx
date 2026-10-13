@@ -4,10 +4,10 @@ import { useMemo, useState } from "react";
 import { Check, ChevronsUpDown, Search } from "lucide-react";
 import {
   Command,
-  CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "@/components/ui/command";
 import {
   Popover,
@@ -68,23 +68,53 @@ export function SmartExerciseSelect({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[320px] p-0">
-        <Command>
-          <div className="flex items-center border-b px-3">
-            <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-            <CommandInput
-              placeholder="Search exercises"
-              value={query}
-              onInput={(e) => setQuery(e.currentTarget.value)}
-            />
+        <Command {...({ shouldFilter: false } as any)}>
+          <div className="flex items-center justify-between border-b px-3">
+            <div className="flex flex-1 items-center">
+              <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+              <CommandInput
+                placeholder="Search exercises"
+                value={query}
+                onInput={(e) => setQuery(e.currentTarget.value)}
+                className="border-none outline-none focus:ring-0"
+              />
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-xs font-semibold text-primary hover:bg-primary/10"
+              onClick={(e) => {
+                e.preventDefault();
+                setOpen(false);
+              }}
+            >
+              Done
+            </Button>
           </div>
-          <CommandEmpty>No exercises found.</CommandEmpty>
-          <div className="max-h-[280px] overflow-auto">
+          <CommandList
+            className="max-h-[280px] overflow-y-auto overscroll-contain"
+            onWheel={(e) => e.stopPropagation()}
+            style={{ pointerEvents: "auto" }}
+          >
+            {filteredRegulars.length === 0 && filteredAll.length === 0 && (
+              <div className="py-6 text-center text-sm text-muted-foreground">
+                No exercises found.
+              </div>
+            )}
             <CommandGroup heading="Your Regulars">
               {filteredRegulars.length > 0 ? (
                 filteredRegulars.map((exercise) => (
                   <CommandItem
-                    key={exercise}
+                    key={`regular-${exercise}`}
+                    {...({ value: `regular-${exercise.toLowerCase()}` } as any)}
                     onSelect={() => toggleExercise(exercise)}
+                    onMouseDown={(e) => {
+                      e.preventDefault(); // Prevents the search bar from losing focus
+                      e.stopPropagation();
+                    }}
+                    onClick={() => toggleExercise(exercise)}
+                    style={{ pointerEvents: "auto" }}
+                    className="cursor-pointer"
                   >
                     <Check
                       className={cn(
@@ -105,8 +135,16 @@ export function SmartExerciseSelect({
               {filteredAll.length > 0 ? (
                 filteredAll.map((exercise) => (
                   <CommandItem
-                    key={exercise}
+                    key={`all-${exercise}`}
+                    {...({ value: `all-${exercise.toLowerCase()}` } as any)}
                     onSelect={() => toggleExercise(exercise)}
+                    onMouseDown={(e) => {
+                      e.preventDefault(); // Prevents the search bar from losing focus
+                      e.stopPropagation();
+                    }}
+                    onClick={() => toggleExercise(exercise)}
+                    style={{ pointerEvents: "auto" }}
+                    className="cursor-pointer"
                   >
                     <Check
                       className={cn(
@@ -123,7 +161,7 @@ export function SmartExerciseSelect({
                 </div>
               )}
             </CommandGroup>
-          </div>
+          </CommandList>
         </Command>
       </PopoverContent>
     </Popover>
