@@ -106,10 +106,6 @@ async def create_plan(
     if not payload.exercises:
         raise HTTPException(status_code=400, detail="At least one exercise is required")
 
-    plan = await session.scalar(
-        select(Plan).where(Plan.user_id == current_user.id, Plan.day == payload.day)
-    )
-
     stmt = (
         select(Plan)
         .where(Plan.user_id == current_user.id, Plan.day == payload.day)
@@ -117,10 +113,11 @@ async def create_plan(
     )
     plan = await session.scalar(stmt)
 
+    is_new_plan = False
+
     if plan is None:
         plan = Plan(user_id=current_user.id, day=payload.day, body_parts=payload.bodyParts)
-        session.add(plan)
-        await session.flush()
+        is_new_plan = True
     else:
         plan.body_parts = payload.bodyParts
 
@@ -130,19 +127,20 @@ async def create_plan(
             select(Exercise).where(Exercise.name == exercise_payload.name)
         )
         if exercise is None:
-            # Upsert custom exercise if it doesn't exist in our seeded DB
             exercise = Exercise(
                 name=exercise_payload.name,
                 body_part=exercise_payload.bodyPart,
                 is_standard=False,
             )
             session.add(exercise)
-            await session.flush() # Flush to get the ID
+            await session.flush()
             
         resolved_exercises.append(exercise)
 
-    # Cleanly map the new relationship state
     plan.exercises = resolved_exercises
+
+    if is_new_plan:
+        session.add(plan)
 
     await session.commit()
     await session.refresh(plan)
@@ -153,6 +151,6 @@ async def create_plan(
         "bodyParts": plan.body_parts,
         "exercises": [
             {"id": exercise.id, "name": exercise.name, "bodyPart": exercise.body_part}
-            for exercise in plan.exercises
+            for exercise in resolved_exercises
         ],
     }

@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { SmartExerciseSelect } from "@/components/planner/smart-exercise-select";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation"; // Added for UI refresh
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   day: z.string().min(1),
@@ -20,7 +20,6 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-// Ensure this matches the Prisma enums exactly
 const BODY_PART_OPTIONS = [
   "CHEST",
   "BACK",
@@ -37,7 +36,7 @@ interface EditDayFormProps {
   dayLabel: string;
   bodyParts: string[];
   exercises: string[];
-  catalog: Array<{ name: string; bodyPart: string; isStandard: boolean }>; // The real catalog
+  catalog: Array<{ name: string; bodyPart: string; isStandard: boolean }>;
   onSuccess?: () => void;
 }
 
@@ -63,7 +62,7 @@ export function EditDayForm({
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      day: dayId, // Send the raw enum to the backend
+      day: dayId,
       bodyParts,
       exercises,
     },
@@ -85,8 +84,15 @@ export function EditDayForm({
   const onSubmit = (values: FormValues) => {
     startTransition(() => {
       void (async () => {
-        if (!session?.user?.id) {
-          toast({ title: "Not authenticated", variant: "destructive" });
+        const token = (session?.user as any)?.accessToken;
+        if (!session?.user?.id || !token) {
+          toast({
+            title: "Session Expired",
+            description:
+              "Please log out and log back in to refresh your token.",
+            variant: "destructive",
+          });
+          console.error("Auth Error: Missing user ID or Access Token");
           return;
         }
 
@@ -96,14 +102,14 @@ export function EditDayForm({
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${(session.user as any).accessToken || ""}`,
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
-              day: values.day, // "MONDAY"
+              day: values.day,
               bodyParts: values.bodyParts,
               exercises: values.exercises.map((exerciseName) => ({
                 name: exerciseName,
-                bodyPart: selectedBodyPart, // Associates the exercise with the body part cleanly
+                bodyPart: selectedBodyPart,
               })),
             }),
           },
@@ -114,7 +120,7 @@ export function EditDayForm({
             title: "Plan updated",
             description: `${dayLabel} saved successfully.`,
           });
-          router.refresh(); // Forces Next.js to re-fetch Server Components!
+          router.refresh();
           onSuccess?.();
         } else {
           const errorBody = await response.json().catch(() => ({}));
@@ -154,7 +160,7 @@ export function EditDayForm({
       <div className="space-y-2">
         <label className="text-sm font-medium">Exercises</label>
         <SmartExerciseSelect
-          recentExercises={standardExercises} // Powered by the real DB now!
+          recentExercises={standardExercises}
           otherExercises={allRelevantExercises}
           value={selectedExercises}
           onChange={(value) => {

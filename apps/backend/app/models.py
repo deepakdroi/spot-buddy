@@ -47,17 +47,26 @@ class Exercise(Base):
     plans: Mapped[list["Plan"]] = relationship(
         secondary=plan_exercise_association,
         back_populates="exercises",
+        lazy="selectin"
     )
 
 class Plan(Base):
     __tablename__ = "plan"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    day: Mapped[str] = mapped_column(String, nullable=False)
+    day: Mapped[str] = mapped_column(ENUM(
+            "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY",
+            name="Day", 
+            create_type=False
+        ), nullable=False)
     
     user_id: Mapped[str] = mapped_column("userId", ForeignKey("user.id"), nullable=False)
     
-    body_parts: Mapped[List[str]] = mapped_column("bodyParts", ARRAY(String), nullable=False)
+    body_parts: Mapped[List[str]] = mapped_column("bodyParts", ARRAY(ENUM(
+                "CHEST", "BACK", "LEGS", "SHOULDERS", "BICEPS", "TRICEPS", "CORE", "FULL_BODY",
+                name="BodyPart",
+                create_type=False
+            )), nullable=False)
     
     created_at: Mapped[datetime] = mapped_column("createdAt", DateTime, default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column("updatedAt", DateTime, default=func.now(), onupdate=func.now(), nullable=False)
@@ -66,4 +75,5 @@ class Plan(Base):
     exercises: Mapped[list["Exercise"]] = relationship(
         secondary=plan_exercise_association,
         back_populates="plans",
+        lazy="selectin"
     )
